@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
-const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-}, []);
-
-// Адаптивный размер планеты
-const getPlanetSize = (level) => {
-    const baseSize = windowWidth < 400 ? 100 : windowWidth < 640 ? 120 : 140;
-    return baseSize + (level - 1) * 6;
-};
 // Картинки для детального просмотра
 const planetDetailImages = {
     1: '/images/planets/gastron.png',

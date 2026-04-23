@@ -11,41 +11,25 @@ const planetImages = {
     8: '/images/planets/education.png',
 };
 
-// Адаптивные размеры в зависимости от ширины экрана
-const getAdaptiveSizes = () => {
-    const width = window.innerWidth;
-    if (width < 400) return { galaxyA: 140, galaxyB: 100, sunSize: 100, planetBaseSize: 45, containerHeight: 380 };
-    if (width < 500) return { galaxyA: 160, galaxyB: 120, sunSize: 120, planetBaseSize: 50, containerHeight: 420 };
-    if (width < 640) return { galaxyA: 180, galaxyB: 140, sunSize: 140, planetBaseSize: 55, containerHeight: 480 };
-    return { galaxyA: 200, galaxyB: 160, sunSize: 160, planetBaseSize: 60, containerHeight: 520 };
-};
+const GALAXY_A = 180;
+const GALAXY_B = 280;
 
 const planetAngles = {
     1: 0, 2: 45, 3: 90, 4: 135, 5: 180, 6: 225, 7: 270, 8: 315,
+};
+
+const getFixedPosition = (planet) => {
+    const angle = planetAngles[planet.id] * Math.PI / 180;
+    return {
+        x: Math.cos(angle) * GALAXY_A,
+        y: Math.sin(angle) * GALAXY_B
+    };
 };
 
 export default function Universe({ planets, onPlanetClick, onBack, onCenterClick }) {
     const [hoveredPlanet, setHoveredPlanet] = useState(null);
     const [offsets, setOffsets] = useState({});
     const [imageErrors, setImageErrors] = useState({});
-    const [adaptiveSizes, setAdaptiveSizes] = useState(getAdaptiveSizes());
-
-    // Отслеживаем изменение размера окна
-    useEffect(() => {
-        const handleResize = () => setAdaptiveSizes(getAdaptiveSizes());
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const { galaxyA: GALAXY_A, galaxyB: GALAXY_B, sunSize: SUN_SIZE, planetBaseSize: PLANET_BASE_SIZE, containerHeight: CONTAINER_HEIGHT } = adaptiveSizes;
-
-    const getFixedPosition = (planet) => {
-        const angle = planetAngles[planet.id] * Math.PI / 180;
-        return {
-            x: Math.cos(angle) * GALAXY_A,
-            y: Math.sin(angle) * GALAXY_B
-        };
-    };
 
     useEffect(() => {
         let lastTime = performance.now();
@@ -61,8 +45,8 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
                 planets.forEach(planet => {
                     const t = animProgress;
                     newOffsets[planet.id] = {
-                        x: Math.sin(t * 0.5 + planet.id) * 3,
-                        y: Math.cos(t * 0.4 + planet.id * 1.3) * 2
+                        x: Math.sin(t * 0.5 + planet.id) * 4,
+                        y: Math.cos(t * 0.4 + planet.id * 1.3) * 3
                     };
                 });
                 return newOffsets;
@@ -76,7 +60,7 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
     }, [planets]);
 
     const getPlanetSize = (level) => {
-        return PLANET_BASE_SIZE + (level - 1) * 4;
+        return 90 + (level - 1) * 10;
     };
 
     const handleImageError = (planetId) => {
@@ -84,20 +68,20 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
     };
 
     return (
-        <div className="px-2">
-            <button onClick={onBack} className="flex items-center gap-1 text-gray-400 mb-2 hover:text-white transition text-sm">
-                <span>←</span> Назад
+        <div>
+            <button onClick={onBack} className="flex items-center gap-2 text-gray-400 mb-4 hover:text-white transition">
+                <span>←</span> Назад на главную
             </button>
 
-            <div className="text-center mb-3">
-                <h1 className="text-lg sm:text-xl font-bold text-white">🌌 Финансовая галактика</h1>
-                <p className="text-gray-400 text-xs">8 планет — твои финансы</p>
+            <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-white">🌌 Финансовая галактика</h1>
+                <p className="text-gray-400 text-sm">8 планет — твои финансовые категории</p>
             </div>
 
-            <div className="relative bg-black/20 rounded-2xl p-2 border border-white/5">
-                <div className="relative" style={{ height: CONTAINER_HEIGHT }}>
+            <div className="relative bg-black/20 rounded-3xl p-4 min-h-[750px] border border-white/5">
+                <div className="relative h-[700px]">
 
-                    {/* Орбита */}
+                    {/* Эллиптическая орбита */}
                     <div
                         className="absolute rounded-full border border-[#2F6BFF]/10 pointer-events-none"
                         style={{
@@ -109,18 +93,22 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
 
                     {/* Солнце - МТБанк */}
                     <div
-                        className="absolute rounded-full flex flex-col items-center justify-center cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95"
+                        className="absolute rounded-full flex flex-col items-center justify-center cursor-pointer transition-all duration-500 hover:scale-105"
                         style={{
                             left: '50%', top: '50%', transform: 'translate(-50%, -50%)',
-                            width: SUN_SIZE, height: SUN_SIZE,
+                            width: '200px', height: '200px',
                             zIndex: 20,
-                            boxShadow: '0 0 40px #2F6BFF, 0 0 20px #2F6BFF'
+                            boxShadow: '0 0 80px #2F6BFF, 0 0 40px #2F6BFF'
                         }}
-                        onClick={() => onCenterClick?.()}>
+                        onClick={() => {
+                            if (onCenterClick) onCenterClick();
+                        }}>
+
                         <div className="absolute inset-0 rounded-full" style={{
-                            boxShadow: '0 0 20px #2F6BFF, 0 0 10px #2F6BFF, inset 0 0 10px rgba(47,107,255,0.5)',
+                            boxShadow: '0 0 40px #2F6BFF, 0 0 20px #2F6BFF, inset 0 0 20px rgba(47,107,255,0.5)',
                             borderRadius: '50%'
                         }} />
+
                         <img
                             src="/images/planets/main.png"
                             alt="МТБанк"
@@ -131,8 +119,13 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
                                 if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
                             }}
                         />
-                        <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 whitespace-nowrap z-20">
-                            <div className="bg-black/70 backdrop-blur-sm rounded-full px-2 py-0.5 text-[9px] text-white font-medium border border-[#2F6BFF]/50">
+                        <div className="absolute inset-0 rounded-full flex flex-col items-center justify-center" style={{ display: 'none' }}>
+                            <span className="text-7xl animate-pulse">⭐</span>
+                            <span className="text-white font-bold text-sm mt-1">МТБанк</span>
+                        </div>
+
+                        <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 whitespace-nowrap z-20">
+                            <div className="bg-black/70 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-white font-medium border border-[#2F6BFF]/50">
                                 МТБанк
                             </div>
                         </div>
@@ -140,8 +133,7 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
 
                     {/* Планеты */}
                     {planets.map(planet => {
-                        const level = Math.floor((planet.infrastructure + planet.housing + planet.leisure) / 3);
-                        const size = getPlanetSize(level);
+                        const size = getPlanetSize(planet.level);
                         const fixedPos = getFixedPosition(planet);
                         const offset = offsets[planet.id] || { x: 0, y: 0 };
                         const isHovered = hoveredPlanet === planet.id;
@@ -150,7 +142,7 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
 
                         return (
                             <div key={planet.id}
-                                 className="absolute cursor-pointer active:scale-95 transition-transform"
+                                 className="absolute cursor-pointer"
                                  style={{
                                      left: `calc(50% + ${fixedPos.x + offset.x}px)`,
                                      top: `calc(50% + ${fixedPos.y + offset.y}px)`,
@@ -169,8 +161,8 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
                                             width: size,
                                             height: size,
                                             filter: isHovered
-                                                ? `drop-shadow(0 0 12px ${planet.color})`
-                                                : `drop-shadow(0 0 6px ${planet.color}99)`,
+                                                ? `drop-shadow(0 0 20px ${planet.color}) drop-shadow(0 0 10px ${planet.color})`
+                                                : `drop-shadow(0 0 12px ${planet.color}99)`,
                                         }}
                                     >
                                         {!hasError && imageUrl ? (
@@ -186,17 +178,20 @@ export default function Universe({ planets, onPlanetClick, onBack, onCenterClick
                                                 style={{
                                                     background: `radial-gradient(circle at 35% 35%, ${planet.colorLight}, ${planet.color}, ${planet.colorDark})`,
                                                 }}>
-                                                <span className="text-3xl">{planet.icon}</span>
+                                                <span className="text-5xl">{planet.icon}</span>
+                                                <span className="text-sm text-white/80 mt-1">Lv.{planet.level}</span>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-500 to-orange-500 text-black text-[10px] font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg border border-white/30 z-10">
-                                        {level}
+                                    <div className="absolute -top-4 -right-4 bg-gradient-to-br from-yellow-500 to-orange-500 text-black text-base font-bold rounded-full w-10 h-10 flex items-center justify-center shadow-lg border-2 border-white/30 z-10">
+                                        {planet.level}
                                     </div>
 
-                                    <div className="mt-1.5 text-center">
-                                        <div className="bg-black/70 backdrop-blur-sm rounded-full px-2 py-0.5 text-[9px] text-white font-medium">
+                                    <div className="mt-3 text-center">
+                                        <div className={`bg-black/70 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-white font-medium transition-all duration-300 ${
+                                            isHovered ? 'border border-[#35D07F] shadow-lg shadow-[#35D07F]/30 scale-105' : ''
+                                        }`}>
                                             {planet.name}
                                         </div>
                                     </div>
